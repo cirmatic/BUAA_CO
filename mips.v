@@ -1,5 +1,9 @@
 `timescale 1ns / 1ps
 `default_nettype none
+
+`define Original_Data 3'b0
+`define M_Data 3'b1
+`define W_Data 3'b10
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -86,7 +90,7 @@ module mips(
 	assign A1_D = Instr_D[25:21];
 	assign A2_D = Instr_D[20:16];
 	// NPC input
-	assign j_Reg_D = (ByPass_Rs_D == 3'b1) ? RegData_M : RD1_D;
+	assign j_Reg_D = (ByPass_Rs_D == `M_Data) ? RegData_M : RD1_D;
 	assign offset_D = out_imm_D;
 	assign tarAddr_D = Instr_D[25:0];
 	// Extend input
@@ -96,8 +100,8 @@ module mips(
 	assign Rt_D = Instr_D[20:16];
 	assign Rd_D = Instr_D[15:11];
 	// Branch input
-	assign Branch_RD1_D = (ByPass_Rs_D == 3'b1) ? RegData_M : RD1_D;
-	assign Branch_RD2_D = (ByPass_Rt_D == 3'b1) ? RegData_M : RD2_D;
+	assign Branch_RD1_D = (ByPass_Rs_D == `M_Data) ? RegData_M : RD1_D;
+	assign Branch_RD2_D = (ByPass_Rt_D == `M_Data) ? RegData_M : RD2_D;
 
 	controlUnit controlunit(.opcode(opcode_D), .funct(funct_D),
 		.BHExt(BHExt_D), .BH(BH_D), .RaLink(RaLink_D), .MemtoReg(MemtoReg_D), 	.ALUSrc(ALUSrc_D), 
@@ -140,17 +144,17 @@ module mips(
 	wire [31:0] ALUOut_E;
 
 	// ALU input
-	assign Src_A_E = (ByPass_SrcA_E == 3'b0) ? RD1_E : 
-	                 (ByPass_SrcA_E == 3'b1) ? RegData_M : 
-					 (ByPass_SrcA_E == 3'b10) ? RegData_W : RD1_E;
+	assign Src_A_E = (ByPass_SrcA_E == `Original_Data) ? RD1_E : 
+	                 (ByPass_SrcA_E == `M_Data) ? RegData_M : 
+					 (ByPass_SrcA_E == `W_Data) ? RegData_W : RD1_E;
 	assign Src_B_E = (ALUSrc_E == 1'b1) ? Imm_E :
-	                 (ByPass_SrcB_E == 3'b0) ? RD2_E :
-					 (ByPass_SrcB_E == 3'b1) ? RegData_M :
-					 (ByPass_SrcB_E == 3'b10) ? RegData_W : RD2_E ;
+	                 (ByPass_SrcB_E == `Original_Data) ? RD2_E :
+					 (ByPass_SrcB_E == `M_Data) ? RegData_M :
+					 (ByPass_SrcB_E == `W_Data) ? RegData_W : RD2_E ;
     // MUX MemData
-	assign MemData_E = (ByPass_SrcB_E == 3'b0) ? RD2_E :
-					   (ByPass_SrcB_E == 3'b1) ? RegData_M :
-					   (ByPass_SrcB_E == 3'b10) ? RegData_W : RD2_E ;
+	assign MemData_E = (ByPass_SrcB_E == `Original_Data) ? RD2_E :
+					   (ByPass_SrcB_E == `M_Data) ? RegData_M :
+					   (ByPass_SrcB_E == `W_Data) ? RegData_W : RD2_E ;
 	// MUX WriteReg
     assign WriteReg_E = (RegDst_E == 1'b1) ? Rd_E : Rt_E;
 
@@ -177,17 +181,17 @@ module mips(
 	/************************M     area****************************/
 	// M area line
 	wire [4:0] WriteReg_M;
-
-	assign WriteReg_M = (RaLink_M == 1'b1) ? 5'h1f : WriteReg_temp_M;
 	// DM line 
 	wire [31:0] Addr_M;
 
 	wire [31:0] ReadData_M;
 
+	// MUX Reg_Data_M
+	assign RegData_M = (RaLink_M == 1'b1) ? PC_plus_8_M : ALUOut_M;
+	// MUX WriteReg_M
+	assign WriteReg_M = (RaLink_M == 1'b1) ? 5'h1f : WriteReg_temp_M;
     // DM input
 	assign Addr_M = ALUOut_M;
-
-	assign RegData_M = (RaLink_M == 1'b1) ? PC_plus_8_M : ALUOut_M;
 
 	DM dm(.clk(clk), .reset(reset), .A(Addr_M), .WD(MemData_M), .pc(PC_M), .BH(BH_M), .BHExt(BHExt_M), .WE(MemWrite_M),  
 		.RD(ReadData_M));
@@ -196,16 +200,14 @@ module mips(
     wire MemtoReg_W;
     wire RegWrite_W;
     wire [31:0] ReadData_W;
-    wire [31:0] ALUOut_W;
     wire [4:0] WriteReg_W;
 	wire [31:0] PC_W;
-	wire [31:0] PC_plus_8_W;
 	wire [31:0] RegData_temp_W;
 
 	MtoW m_to_w(.clk(clk), .reset(reset), .MemtoReg_M2(MemtoReg_M), .RegWrite_M2(RegWrite_M), .ReadData_M2(ReadData_M), 
-	.ALUOut_M2(ALUOut_M), .WriteReg_M2(WriteReg_M), .PC_M2(PC_M), .PC_plus_8_M2(PC_plus_8_M), .RegData_M2(RegData_M),
-	        .MemtoReg_W1(MemtoReg_W), .RegWrite_W1(RegWrite_W), .ReadData_W1(ReadData_W), .ALUOut_W1(ALUOut_W), 
-	.WriteReg_W1(WriteReg_W), .PC_W1(PC_W), .PC_plus_8_W1(PC_plus_8_W), .RegData_W1(RegData_temp_W));
+	.WriteReg_M2(WriteReg_M), .PC_M2(PC_M), .RegData_M2(RegData_M),
+	        .MemtoReg_W1(MemtoReg_W), .RegWrite_W1(RegWrite_W), .ReadData_W1(ReadData_W), 
+	.WriteReg_W1(WriteReg_W), .PC_W1(PC_W), .RegData_W1(RegData_temp_W));
 
 	/*************************W    area****************************/
     // W area line

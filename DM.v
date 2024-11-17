@@ -36,9 +36,11 @@ module DM(
 	 wire [31:0] LData;
 	 wire [13:2] writeReg, readReg;
      wire [31:0] newWD;
+	 wire [31:0] display_A;
 
 	 assign writeReg = A[13:2];
 	 assign readReg = A[13:2];
+	 assign display_A = A & 32'hfffffffc;
 	
 	 LS_Control ls_control(.A(A), .RD(ram[readReg]), .BHExt(BHExt), .WD(WD), .LData(LData), .newWD(newWD));
 	
@@ -59,14 +61,14 @@ module DM(
 							if (BH == 1'b1)
 							    begin
 									ram[writeReg] <= newWD;
-									$display("%d@%h: *%h <= %h", $time, pc, A, newWD); //display write
-									//$display("@%h: *%h <= %h", pc, A, newWD); //display write
+									$display("%d@%h: *%h <= %h", $time, pc, display_A, newWD); //display write
+									//$display("@%h: *%h <= %h", pc, display_A, newWD); //display write
 								end
 							else 
 								begin
 									ram[writeReg] <= WD;
-									$display("%d@%h: *%h <= %h", $time, pc, A, WD); //display write
-									//$display("@%h: *%h <= %h", pc, A, WD); //display write
+									$display("%d@%h: *%h <= %h", $time, pc, display_A, WD); //display write
+									//$display("@%h: *%h <= %h", pc, display_A, WD); //display write
 								end
 						end
 					else 

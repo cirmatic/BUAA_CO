@@ -25,39 +25,31 @@ module MtoW(
     input wire MemtoReg_M2,
     input wire RegWrite_M2,
     input wire [31:0] ReadData_M2,
-    input wire [31:0] ALUOut_M2,  
     input wire [4:0] WriteReg_M2,
     input wire [31:0] PC_M2,
-    input wire [31:0] PC_plus_8_M2,
     input wire [31:0] RegData_M2,
 
     output wire MemtoReg_W1,
     output wire RegWrite_W1,
     output wire [31:0] ReadData_W1,
-    output wire [31:0] ALUOut_W1,
     output wire [4:0] WriteReg_W1,
     output wire [31:0] PC_W1,
-    output wire [31:0] PC_plus_8_W1,
     output wire [31:0] RegData_W1
     );
 
     reg MemtoReg;
     reg RegWrite;
     reg [31:0] ReadData;
-    reg [31:0] ALUOut;
     reg [4:0] WriteReg;
     reg [31:0] PC;
-    reg [31:0] PC_plus_8;
     reg [31:0] RegData;
 
 
     assign MemtoReg_W1 = MemtoReg;
     assign RegWrite_W1 = RegWrite;
     assign ReadData_W1 = ReadData;
-    assign ALUOut_W1 = ALUOut;
     assign WriteReg_W1 = WriteReg;
     assign PC_W1 = PC;
-    assign PC_plus_8_W1 = PC_plus_8;
     assign RegData_W1 = RegData;
 
     always @(posedge clk)
@@ -67,10 +59,8 @@ module MtoW(
                     MemtoReg <= 1'b0;
                     RegWrite <= 1'b0;
                     ReadData <= 32'b0;
-                    ALUOut <= 32'b0;
                     WriteReg <= 5'b0;
                     PC <= 32'b0;
-                    PC_plus_8 <= 32'b0;
                     RegData <= 32'b0;
                 end
             else 
@@ -78,10 +68,8 @@ module MtoW(
                     MemtoReg <= MemtoReg_M2;
                     RegWrite <= RegWrite_M2;
                     ReadData <= ReadData_M2;
-                    ALUOut <= ALUOut_M2;
                     WriteReg <= WriteReg_M2;
                     PC <= PC_M2;
-                    PC_plus_8 <= PC_plus_8_M2;
                     RegData <= RegData_M2;
                 end
        end

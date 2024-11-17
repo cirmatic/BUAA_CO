@@ -56,31 +56,31 @@ module Conflict(
     // load and Branch and jr nop
     always @(*)
         begin
-            if (MemtoReg_E == 1'b1 && (Rs_D == WriteReg_E || Rt_D == WriteReg_E))
+            if (MemtoReg_E == 1'b1 && WriteReg_E != 5'b0 && (Rs_D == WriteReg_E || Rt_D == WriteReg_E)) // E is lw and hazard
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;
                     clr_E = 1'b1;
                 end
-            else if (Branch_D == 1'b1 && RegWrite_E == 1'b1 && (Rs_D == WriteReg_E || Rt_D == WriteReg_E)) //Branch and E is ALU
+            else if (Branch_D == 1'b1 && RegWrite_E == 1'b1 && WriteReg_E != 5'b0 && (Rs_D == WriteReg_E || Rt_D == WriteReg_E) ) //Branch and E is ALU
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;
                     clr_E = 1'b1;
                 end
-            else if (Branch_D == 1'b1 && MemtoReg_M == 1'b1 && (Rs_D == WriteReg_M || Rt_D == WriteReg_M)) // Branch and M is lw
+            else if (Branch_D == 1'b1 && MemtoReg_M == 1'b1 && WriteReg_M != 5'b0 && (Rs_D == WriteReg_M || Rt_D == WriteReg_M)) // Branch and M is lw
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;
                     clr_E = 1'b1;
                 end
-            else if (J_Op_D == 3'b11 && RegWrite_E == 1'b1 && Rs_D == WriteReg_E) // jr and E is ALU
+            else if (J_Op_D == 3'b11 && RegWrite_E == 1'b1 && WriteReg_E != 5'b0 && Rs_D == WriteReg_E) // jr and E is ALU
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;
                     clr_E = 1'b1;
                 end
-            else if (J_Op_D == 3'b11 && MemtoReg_M == 1'b1 && Rs_D == WriteReg_M) // jr and M is lw
+            else if (J_Op_D == 3'b11 && MemtoReg_M == 1'b1 && WriteReg_M != 5'b0 && Rs_D == WriteReg_M) // jr and M is lw
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;

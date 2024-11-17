@@ -37,22 +37,18 @@ module mips_tb;
 	initial begin
 		// Initialize Inputs
 		clk = 0;
-		reset = 0;
 
 		// Wait 100 ns for global reset to finish
-		#100;
-		
 		reset = 1;
-		#2;
+		#10;
 		
 		reset = 0;
-		#2;
         
 		// Add stimulus here
 
 	end
       
-		always #1 clk = ~clk;
+		always #5 clk = ~clk;
 		
 endmodule
 
