@@ -24,6 +24,7 @@ module IFU(
 	input wire clk,
 	input wire reset,
 	input wire EN_F,
+
 	output wire [31:0] Instr,
 	output wire [31:0] PC
     );
@@ -37,8 +38,8 @@ module IFU(
 	wire [23:0] Addr;
 
 	initial begin
-		//$readmemh("E:\\verilog\\p5\\code.txt", im);
-		$readmemh("code.txt", im);
+		$readmemh("E:\\verilog\\p5\\code.txt", im);
+		//$readmemh("code.txt", im);
 	end
 
 	// PC module
@@ -58,6 +59,7 @@ module PC(
 	input wire clk,
 	input wire reset,
 	input wire EN_F,
+
 	output wire [31:0] Now_PC
 	);
 	

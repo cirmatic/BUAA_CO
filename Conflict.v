@@ -2,8 +2,9 @@
 `default_nettype none
 
 `define Original_Data 3'b0
-`define M_Data 3'b1
-`define W_Data 3'b10
+`define E_Data 3'b1
+`define M_Data 3'b10
+`define W_Data 3'b11
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -25,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 module Conflict(
     input wire Branch_D,
+    input wire clear_nop_D, 
     input wire [2:0] J_Op_D,
     input wire [4:0] Rs_D,
     input wire [4:0] Rt_D,
@@ -33,6 +35,7 @@ module Conflict(
     input wire [4:0] Rt_E,
     input wire RegWrite_E,
     input wire MemtoReg_E,
+    input wire RaLink_E,
     input wire [4:0] WriteReg_E,
 
     input wire MemtoReg_M,
@@ -50,8 +53,18 @@ module Conflict(
 
     output reg EN_F,
     output reg EN_D,
-    output reg clr_E
+    output wire clr_D, 
+    output reg clr_E,
+    output wire clr_M,
+    output wire clr_W
     );
+
+
+/**********************************************************************************************************************/
+    assign clr_D = clear_nop_D & EN_D & EN_F;
+    assign clr_M = 1'b0;
+    assign clr_W = 1'b0;
+/**********************************************************************************************************************/
 
     // load and Branch and jr nop
     always @(*)
@@ -62,7 +75,7 @@ module Conflict(
                     EN_D = 1'b0;
                     clr_E = 1'b1;
                 end
-            else if (Branch_D == 1'b1 && RegWrite_E == 1'b1 && WriteReg_E != 5'b0 && (Rs_D == WriteReg_E || Rt_D == WriteReg_E) ) //Branch and E is ALU
+            else if (Branch_D == 1'b1 && RegWrite_E == 1'b1 && WriteReg_E != 5'b0 && RaLink_E == 1'b0 && (Rs_D == WriteReg_E || Rt_D == WriteReg_E) ) //Branch and E is ALU(not jal)
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;
@@ -74,7 +87,7 @@ module Conflict(
                     EN_D = 1'b0;
                     clr_E = 1'b1;
                 end
-            else if (J_Op_D == 3'b11 && RegWrite_E == 1'b1 && WriteReg_E != 5'b0 && Rs_D == WriteReg_E) // jr and E is ALU
+            else if (J_Op_D == 3'b11 && RegWrite_E == 1'b1 && WriteReg_E != 5'b0 && RaLink_E == 1'b0 && Rs_D == WriteReg_E) // jr and E is ALU
                 begin
                     EN_F = 1'b0;
                     EN_D = 1'b0;
@@ -131,7 +144,11 @@ module Conflict(
     // Rs_D: Branch and jr choosing
     always @(*)
         begin
-            if (RegWrite_M == 1'b1 && Rs_D != 5'b0 && WriteReg_M == Rs_D)
+            if (RaLink_E == 1'b1 && Rs_D != 5'b0 && Rs_D == 5'h1f)
+                begin
+                    ByPass_Rs_D = `E_Data;
+                end
+            else if (RegWrite_M == 1'b1 && Rs_D != 5'b0 && WriteReg_M == Rs_D)
                 begin
                     ByPass_Rs_D = `M_Data;
                 end
@@ -144,7 +161,11 @@ module Conflict(
     // Rt_D: Branch and jr chossing
     always @(*)
         begin
-            if (RegWrite_M == 1'b1 && Rt_D != 5'b0 && WriteReg_M == Rt_D)
+            if (RaLink_E == 1'b1 && Rt_D != 5'b0 && Rt_D == 5'h1f)
+                begin
+                    ByPass_Rt_D = `E_Data;
+                end
+            else if (RegWrite_M == 1'b1 && Rt_D != 5'b0 && WriteReg_M == Rt_D)
                 begin
                     ByPass_Rt_D = `M_Data;
                 end
@@ -152,7 +173,5 @@ module Conflict(
                 begin
                     ByPass_Rt_D = `Original_Data;
                 end
-
         end
-
 endmodule

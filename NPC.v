@@ -26,6 +26,7 @@ module NPC(
 	input wire [25:0] tarAddr,
 	input wire [31:0] j_Reg,
 	input wire [2:0] J_Op,
+
 	output wire [31:0] PC_plus_8,
 	output reg [31:0] Next_PC
     );

@@ -16,6 +16,7 @@
 `define bne 6'b000101
 `define bgtz 6'b000111
 `define sb  6'b101000
+`define bgezall 6'b111000
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -49,25 +50,27 @@ module controlUnit(
 	output wire MemWrite, 
 	output wire SignedExt, 
 	output wire Branch,
+	output wire Bgezall, 
 	output reg [2:0] J_Op,
 	output reg [2:0] Branch_Op,
 	output reg [2:0] ALU_Op
     );
 
 	// var
-	wire add, sub, ori, lui, j, jal, jr, lw, sw, beq, bne, lb, lbu, sb, bgtz;
+	wire add, sub, ori, lui, j, jal, jr, lw, sw, beq, bne, lb, lbu, sb, bgtz, bgezall;
 
 	// output assign
 	assign BHExt = lbu;
 	assign BH = lbu | lb | sb;
-	assign RaLink = jal;
+	assign RaLink = jal | bgezall;
 	assign MemtoReg = lbu | lb | lw;
 	assign ALUSrc = lbu | lb | sb | sw | lw | lui | ori;
 	assign RegDst = add | sub;
-	assign RegWrite = lbu | lb | lw | jal | lui | ori | add | sub;
+	assign RegWrite = lbu | lb | lw | jal | lui | ori | add | sub | bgezall;
 	assign MemWrite = sw | sb;
-	assign SignedExt = lbu | lb | sb | bne | beq | sw | lw | bgtz;
-	assign Branch = bne | beq | bgtz;
+	assign SignedExt = lbu | lb | sb | bne | beq | sw | lw | bgtz | bgezall;
+	assign Branch = bne | beq | bgtz | bgezall;
+	assign Bgezall = bgezall;
 	
 	// J_Op
 	always @(*)
@@ -130,6 +133,10 @@ module controlUnit(
 				begin
 					Branch_Op = 3'b11;
 				end
+			else if (bgezall == 1'b1)
+				begin
+					Branch_Op = 3'b100;
+				end
 			else 
 				begin
 					Branch_Op = 3'b0;
@@ -152,6 +159,7 @@ module controlUnit(
 	assign lb  = (opcode == `lb);
 	assign lbu = (opcode == `lbu);
 	assign sb  = (opcode == `sb);
+	assign bgezall = (opcode == `bgezall);
 
 endmodule
 

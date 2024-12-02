@@ -50,6 +50,11 @@ module Branch(
 					Zero = (RD1 > 32'b0);
 					If_Branch = Branch & Zero;
 				end
+			else if (Branch_Op == 3'b100)
+				begin
+					Zero = ($signed(RD1) >= $signed(0));
+					If_Branch = Branch & Zero;
+				end
 			else 
 				begin
 					If_Branch = 1'b0;

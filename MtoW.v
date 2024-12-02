@@ -22,6 +22,7 @@
 module MtoW(
     input wire clk,
     input wire reset,
+    input wire clr_W,
     input wire MemtoReg_M2,
     input wire RegWrite_M2,
     input wire [31:0] ReadData_M2,
@@ -55,6 +56,15 @@ module MtoW(
     always @(posedge clk)
         begin
             if (reset == 1'b1)
+                begin
+                    MemtoReg <= 1'b0;
+                    RegWrite <= 1'b0;
+                    ReadData <= 32'b0;
+                    WriteReg <= 5'b0;
+                    PC <= 32'b0;
+                    RegData <= 32'b0;
+                end
+            else if (clr_W == 1'b1)
                 begin
                     MemtoReg <= 1'b0;
                     RegWrite <= 1'b0;

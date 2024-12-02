@@ -22,6 +22,7 @@
 module EtoM(
     input wire clk,
     input wire reset,
+    input wire clr_M, 
     input wire BHExt_E2,  
     input wire BH_E2,    
     input wire RaLink_E2,  
@@ -87,6 +88,20 @@ module EtoM(
                     PC <= 32'b0;
                     PC_plus_8 <= 32'b0;
                 end
+            else if (clr_M == 1'b1)
+                begin
+                    BHExt <= 1'b0;
+                    BH <= 1'b0;
+                    RaLink <= 1'b0;
+                    MemtoReg <= 1'b0;
+                    RegWrite <= 1'b0;
+                    MemWrite <= 1'b0;
+                    ALUOut <= 32'b0;
+                    MemData <= 32'b0; 
+                    WriteReg <= 5'b0;
+                    PC <= 32'b0;
+                    PC_plus_8 <= 32'b0;
+                end
             else 
                 begin
                     BHExt <= BHExt_E2;
@@ -102,5 +117,4 @@ module EtoM(
                     PC_plus_8 <= PC_plus_8_E2;
                 end
         end
-
 endmodule

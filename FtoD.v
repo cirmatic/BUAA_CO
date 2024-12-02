@@ -25,6 +25,7 @@ module FtoD(
     input wire [31:0] Instr_F2,
     input wire [31:0] PC_F2,
     input wire EN_D,
+    input wire clr_D,
 
     output wire [31:0] Instr_D1,
     output wire [31:0] PC_D1 	
@@ -39,6 +40,11 @@ module FtoD(
     always @(posedge clk)
         begin
             if (reset == 1'b1)
+                begin
+                    Instr <= 32'b0;
+                    PC <= 32'b0;
+                end
+            else if (clr_D == 1'b1) 
                 begin
                     Instr <= 32'b0;
                     PC <= 32'b0;
